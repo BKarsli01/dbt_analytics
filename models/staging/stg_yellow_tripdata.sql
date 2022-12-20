@@ -34,6 +34,6 @@ select
 from {{ source("staging", "yellow_tripdata") }}
 -- dbt build --m <model.sql> --var 'is_test_run: false'
 -- setting up a limit is useful during development to save up time. Run the full version during production
-{% if var('is_test_run', default=true) %}
-    limit 100
-{% endif %}
+-- {% if var('is_test_run', default=true) %}
+--     limit 100
+-- {% endif %}

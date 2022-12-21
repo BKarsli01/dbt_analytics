@@ -1,5 +1,13 @@
 {{ config(materialized="view") }}
 
+with tripdata as 
+(
+  select *,
+    row_number() over(partition by vendorid, tpep_pickup_datetime) as rn
+  from {{ source('staging','yellow_tripdata') }}
+  where vendorid is not null 
+)
+
 select
     -- identifiers
     {{ dbt_utils.surrogate_key(['vendorid', 'tpep_pickup_datetime']) }} as tripid,
@@ -31,9 +39,9 @@ select
     {{ get_payment_type_description('payment_type') }} as payment_type_description,
     cast(congestion_surcharge as numeric) as congestion_surcharge
 
-from {{ source("staging", "yellow_tripdata") }}
+from tripdata
 -- dbt build --m <model.sql> --var 'is_test_run: false'
 -- setting up a limit is useful during development to save up time. Run the full version during production
 -- {% if var('is_test_run', default=true) %}
---     limit 100
+limit 100
 -- {% endif %}
